@@ -1,0 +1,87 @@
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID.    CSVCOBOL.
+       AUTHOR.        STUDENT.
+      *
+       ENVIRONMENT DIVISION.
+      *
+       INPUT-OUTPUT SECTION.
+
+       FILE-CONTROL.
+           SELECT PRT-IN ASSIGN TO PRTIN.
+           SELECT PRT-OUT ASSIGN TO PRTOUT.
+
+       DATA DIVISION.
+       FILE SECTION.
+
+       FD  PRT-IN RECORD CONTAINS 80 CHARACTERS RECORDING MODE F.
+       01  IN-REC            PIC X(80) VALUE SPACES.
+
+       FD  PRT-OUT RECORD CONTAINS 80 CHARACTERS RECORDING MODE F.
+       01  OUT-REC           PIC X(80) VALUE SPACES.
+
+
+       WORKING-STORAGE SECTION.
+       01  FIRSTNAME         PIC X(11) VALUE SPACES.
+       01  LASTNAME          PIC X(22) VALUE SPACES.
+       01  NHSNUMBER         PIC X(10) VALUE SPACES.
+       01  PROCEDURECODE     PIC X(7) VALUE SPACES.
+
+       01  TEMP-REC          PIC X(80) VALUE SPACES.
+       01  WS-TABLE.
+           05 TAB-REC        PIC X(80) OCCURS 1000 TIMES VALUE SPACES.
+       01  SWITCHES.
+           05  EOF-SWITCH    PIC X(1)  VALUE 'N'.
+       01  TOTAL-LINES       PIC 9(4)  VALUE 0.
+       01  I                 PIC 9(4)  VALUE 1.
+
+
+      ****************************************************************
+      *                  PROCEDURE DIVISION                          *
+      ****************************************************************
+       PROCEDURE DIVISION.
+      *
+       A000-START.
+           OPEN INPUT PRT-IN.
+           OPEN OUTPUT PRT-OUT.
+
+           PERFORM A100-WRITE-TO-TABLE UNTIL EOF-SWITCH = 'Y'.
+      *I IS THE TABLE POSITION. RESETTING TO 1
+           MOVE 1 TO I.
+           PERFORM A200-WRITE-INFO UNTIL I > TOTAL-LINES.
+
+           CLOSE PRT-IN.
+           CLOSE PRT-OUT.
+           STOP RUN.
+
+      *READ THE INPUT FILE AND REMOVE THE COMMAS USING UNSTRING
+      *MOVE DATA FROM INPUT FILE INTO A TABLE IN THE CORRECT FORMAT
+       A100-WRITE-TO-TABLE.
+           MOVE SPACES TO IN-REC.
+           MOVE SPACES TO OUT-REC.
+           MOVE SPACES TO TEMP-REC.
+
+           READ PRT-IN
+              AT END
+                 MOVE 'Y' TO EOF-SWITCH
+              NOT AT END
+                 UNSTRING IN-REC DELIMITED BY "," OR ALL SPACES
+                    INTO FIRSTNAME
+                         LASTNAME
+                         NHSNUMBER
+                         PROCEDURECODE
+                    MOVE FIRSTNAME TO TEMP-REC(1:11)
+                    MOVE LASTNAME  TO TEMP-REC(13:22)
+                    MOVE NHSNUMBER TO TEMP-REC(36:10)
+                    MOVE PROCEDURECODE TO TEMP-REC(50:7)
+                    MOVE TEMP-REC TO TAB-REC(I)
+                    COMPUTE I = I + 1
+                    COMPUTE TOTAL-LINES = TOTAL-LINES + 1.
+
+
+      *WRITE THE INFO FROM THE TABLE TO THE OUTPUT FILE
+       A200-WRITE-INFO.
+           MOVE SPACES TO OUT-REC.
+           MOVE TAB-REC(I) TO OUT-REC.
+           WRITE OUT-REC.
+           COMPUTE I = I + 1.
+
