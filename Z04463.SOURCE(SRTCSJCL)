@@ -1,5 +1,0 @@
-//SRTCSJCL  JOB 1,NOTIFY=&SYSUID
-//***************************************************/
-//SORT    EXEC PGM=SORT
-//SYSOUT    DD SYSOUT=*,OUTLIM=15000
-//SORTIN    DD DSN=Z04463.INPUT(CSVDATA),DISP=SHR
