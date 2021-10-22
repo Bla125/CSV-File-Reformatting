@@ -1,0 +1,17 @@
+//SRTCSJCL  JOB 1,NOTIFY=&SYSUID
+//***************************************************/
+//SORT    EXEC PGM=SORT
+//SYSOUT    DD SYSOUT=*,OUTLIM=15000
+//SORTIN    DD DSN=Z04463.INPUT(CSVDATA),DISP=SHR
+//SORTOUT   DD DSN=Z04463.OUTPUT(CSVDATA),DISP=SHR,OUTLIM=15000
+//SYSIN     DD *
+    SORT FORMAT=CH,
+         FIELDS=(1,1,CH,A)
+    SORT FIELDS=COPY
+    INREC PARSE=(%01=(ENDBEFR=C',',FIXLEN=11),
+                 %02=(ENDBEFR=C',',FIXLEN=22),
+                 %03=(ENDBEFR=C',',FIXLEN=10),
+                 %04=(FIXLEN=7)),
+        BUILD=(%01,13:%02,36:%03,50:%04)
+/*
+
